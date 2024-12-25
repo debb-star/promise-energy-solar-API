@@ -263,12 +263,7 @@
           <InputBool bind:value={playAnimation} label="Play animation" />
         {/if}
       {/if}
-      <div class="flex flex-row">
-        <div class="grow" />
-        <md-filled-tonal-button role={undefined} on:click={() => apiResponseDialog.show()}>
-          API response
-        </md-filled-tonal-button>
-      </div>
+      
 
       <md-dialog bind:this={apiResponseDialog}>
         <div slot="headline">
@@ -290,7 +285,7 @@
   </Expandable>
 {/if}
 
-<div class="absolute top-0 left-0 w-72">
+<div class="relative top-0 left-0 w-72">
   {#if expandedSection == title && layer}
     <div class="m-2">
       <SummaryCard {icon} {title} rows={[{ name: dataLayerOptions[layerId], value: '' }]}>
@@ -346,50 +341,4 @@
   {/if}
 </div>
 
-<div class="absolute bottom-6 left-0 w-full">
-  <div class="md:mr-96 mr-80 grid place-items-center">
-    {#if layer}
-      <div
-        class="flex items-center surface on-surface-text pr-4 text-center label-large rounded-full shadow-md"
-      >
-        {#if layer.id == 'monthlyFlux'}
-          <md-slider
-            range
-            min={0}
-            max={11}
-            value-start={month}
-            value-end={month}
-            on:input={onSliderChange}
-          />
-          <span class="w-8">{monthNames[month]}</span>
-        {:else if layer.id == 'hourlyShade'}
-          <md-slider
-            range
-            min={0}
-            max={23}
-            value-start={hour}
-            value-end={hour}
-            on:input={onSliderChange}
-          />
-          <span class="w-24 whitespace-nowrap">
-            {monthNames[month]}
-            {day},
-            {#if hour == 0}
-              12am
-            {:else if hour < 10}
-              {hour}am
-            {:else if hour < 12}
-              {hour}am
-            {:else if hour == 12}
-              12pm
-            {:else if hour < 22}
-              {hour - 12}pm
-            {:else}
-              {hour - 12}pm
-            {/if}
-          </span>
-        {/if}
-      </div>
-    {/if}
-  </div>
-</div>
+

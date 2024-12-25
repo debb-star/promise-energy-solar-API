@@ -178,11 +178,7 @@
       />
       <InputBool bind:value={showPanels} label="Solar panels" />
 
-      <div class="grid justify-items-end">
-        <md-filled-tonal-button role={undefined} on:click={() => apiResponseDialog.show()}>
-          API response
-        </md-filled-tonal-button>
-      </div>
+      
 
       <md-dialog bind:this={apiResponseDialog}>
         <div slot="headline">
@@ -204,7 +200,7 @@
   </Expandable>
 
   {#if expandedSection == title}
-    <div class="absolute top-0 left-0 w-72">
+    <div class="relative top-0 left-0 w-72">
       <div class="flex flex-col space-y-2 m-2">
         <SummaryCard
           {icon}

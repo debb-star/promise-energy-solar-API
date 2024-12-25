@@ -1,27 +1,8 @@
-<!--
- Copyright 2023 Google LLC
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-      https://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- -->
-
 <script lang="ts">
   /* global google */
-
   import * as GMAPILoader from '@googlemaps/js-api-loader';
   const { Loader } = GMAPILoader;
-
   import { onMount } from 'svelte';
-
   import SearchBar from './components/SearchBar.svelte';
   import Sections from './sections/Sections.svelte';
 
@@ -30,7 +11,9 @@
     name: 'Rinconada Library',
     address: '1213 Newell Rd, Palo Alto, CA 94303',
   };
+
   let location: google.maps.LatLng | undefined;
+  let isSidebarOpen = false; // Track sidebar state for mobile
   const zoom = 19;
 
   // Initialize app.
@@ -39,6 +22,16 @@
   let geometryLibrary: google.maps.GeometryLibrary;
   let mapsLibrary: google.maps.MapsLibrary;
   let placesLibrary: google.maps.PlacesLibrary;
+
+  // Toggle sidebar function for mobile
+  const toggleSidebar = () => {
+    isSidebarOpen = !isSidebarOpen;
+  };
+
+  // Popup visibility states
+  let showPopup1 = true; // First popup
+  let showPopup2 = false; // Second popup
+
   onMount(async () => {
     // Load the Google Maps libraries.
     const loader = new Loader({ apiKey: googleMapsApiKey });
@@ -71,59 +64,146 @@
       streetViewControl: false,
       zoomControl: false,
     });
+
+    // Trigger resize when map is loaded to ensure proper rendering
+    window.addEventListener('resize', () => {
+      if (map) {
+        google.maps.event.trigger(map, 'resize');
+      }
+    });
   });
+
+  // Close popup 1 and show popup 2
+  const closePopup1 = () => {
+    showPopup1 = false;
+    showPopup2 = true;
+  };
+
+  // Close popup 2
+  const closePopup2 = () => {
+    showPopup2 = false;
+  };
 </script>
 
-<!-- Top bar -->
-<div class="flex flex-row h-full">
+<!-- Header -->
+<header class="bg-[#005f7f] text-white shadow-md p-4 fixed w-full top-0 left-0 z-50">
+  <div class="flex justify-between items-center">
+    <h1 class="text-2xl font-semibold">Promise Energy</h1>
+    <nav>
+      <ul class="flex space-x-6">
+        <li><a href="https://promiseenergy.com/" class="hover:underline transition-all">Home</a></li>
+        <li><a href="https://promiseenergy.com/about" class="hover:underline transition-all">About</a></li>
+        <li><a href="https://promiseenergy.com/contact" class="hover:underline transition-all">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- Mobile toggle button -->
+<button
+  class="fixed z-50 top-20 left-4 bg-white p-2 rounded-full shadow-lg md:hidden"
+  on:click={toggleSidebar}
+  aria-label="Toggle sidebar"
+>
+  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    {#if isSidebarOpen}
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+    {:else}
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+    {/if}
+  </svg>
+</button>
+
+<!-- First Popup Modal -->
+{#if showPopup1}
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div class="bg-white p-6 rounded-lg w-11/12 md:w-96">
+      <h2 class="text-xl font-semibold mb-4">Understand Your Energy Costs & Save with Solar</h2>
+      <p class="mb-4">This tool helps you understand your current energy costs by analyzing your consumption patterns. By assessing your usage, you can see how implementing solar solutions can significantly reduce your electricity bills and lower your environmental impact.</p>
+      <p>Promise Energy offers tailored solar solutions to help you make the switch to clean, affordable energy. Start saving today and cut your costs with our personalized solar plans!</p>
+      <button class="mt-4 w-full bg-[#005f7f] text-white p-2 rounded-md hover:bg-[#004a5c]" on:click={closePopup1}>Close</button>
+    </div>
+  </div>
+{/if}
+
+<!-- Second Popup Modal -->
+{#if showPopup2}
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div class="bg-white p-6 rounded-lg w-11/12 md:w-96">
+      <h2 class="text-xl font-semibold mb-4">How to Use This Tool</h2>
+      <p class="mb-4">To use this tool, simply enter your address in the search bar to get an overview of your energy consumption. You can explore how much energy your location uses and how solar energy can help lower your costs.</p>
+      <p>Once you've reviewed the details, Promise Energy offers personalized plans and consultations to help you implement solar solutions that fit your needs and budget.</p>
+      <button class="mt-4 w-full bg-[#005f7f] text-white p-2 rounded-md hover:bg-[#004a5c]" on:click={closePopup2}>Close</button>
+    </div>
+  </div>
+{/if}
+
+<div class="flex flex-col md:flex-row h-full relative mt-16"> <!-- Added margin-top to offset the fixed header -->
   <!-- Main map -->
-  <div bind:this={mapElement} class="w-full" />
-
-  <!-- Side bar -->
-  <aside class="flex-none md:w-96 w-80 p-2 pt-3 overflow-auto">
-    <div class="flex flex-col space-y-2 h-full">
+  <div bind:this={mapElement} class="w-full h-[calc(100vh-3rem)] md:h-screen" />
+  
+  <!-- Side bar - responsive design -->
+  <aside
+    class="
+      fixed md:static 
+      w-full md:w-96 
+      h-screen 
+      bg-white
+      transform transition-transform duration-300 ease-in-out
+      {isSidebarOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
+      right-0 top-0
+      z-40
+      overflow-auto
+      shadow-lg md:shadow-none
+      {isSidebarOpen ? 'pt-20' : ''} <!-- Added padding-top when sidebar is open in mobile view -->
+    "
+  >
+    <div class="flex flex-col space-y-2 h-full p-4">
       {#if placesLibrary && map}
-        <SearchBar bind:location {placesLibrary} {map} initialValue={defaultPlace.name} />
+        <SearchBar 
+          bind:location 
+          {placesLibrary} 
+          {map} 
+          initialValue={defaultPlace.name}
+        />
       {/if}
-
-      <div class="p-4 surface-variant outline-text rounded-lg space-y-3">
-        <p>
-          <a
-            class="primary-text"
-            href="https://developers.google.com/maps/documentation/solar/overview?hl=en"
-            target="_blank"
-          >
-            Two distinct endpoints of the <b>Solar API</b>
-            <md-icon class="text-sm">open_in_new</md-icon>
-          </a>
-          offer many benefits to solar marketplace websites, solar installers, and solar SaaS designers.
-        </p>
-
-        <p>
-          <b>Click on an area below</b>
-          to see what type of information the Solar API can provide.
-        </p>
-      </div>
-
+      
       {#if location}
-        <Sections {location} {map} {geometryLibrary} {googleMapsApiKey} />
+        <Sections 
+          {location} 
+          {map} 
+          {geometryLibrary} 
+          {googleMapsApiKey}
+        />
       {/if}
-
+      
       <div class="grow" />
-
-      <div class="flex flex-col items-center w-full">
-        <md-text-button
-          href="https://github.com/googlemaps-samples/js-solar-potential"
-          target="_blank"
-        >
-          View code on GitHub
-          <img slot="icon" src="github-mark.svg" alt="GitHub" width="16" height="16" />
-        </md-text-button>
-      </div>
-
-      <span class="pb-4 text-center outline-text label-small">
-        This is not an officially supported Google product.
-      </span>
     </div>
   </aside>
 </div>
+
+<!-- Footer -->
+<footer class="bg-[#003c4f] text-white p-4 mt-4">
+  <div class="flex justify-between items-center">
+    <p>&copy; 2024 Promise Energy. All Rights Reserved.</p>
+    <div>
+      <a href="https://promiseenergy.com/privacy-policy" class="hover:underline">Privacy Policy</a>
+      <span class="mx-2">|</span>
+      <a href="https://promiseenergy.com/who-we-serve" class="hover:underline">Terms of Service</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  /* Prevent body scroll when sidebar is open on mobile */
+  :global(body.sidebar-open) {
+    overflow: hidden;
+  }
+
+  /* Ensure the map container takes full height */
+  :global(html, body) {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+</style>
