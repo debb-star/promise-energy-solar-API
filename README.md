@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ☀️ Solar Potential demo
 
 > _This is not an officially supported Google product._
@@ -89,3 +90,6 @@ To fix any lint issues, use `npm run format` to automatically format all the cod
 - [Tailwind](https://tailwindcss.com): CSS framework for design and styling.
 - [ESLint](https://eslint.org): Statically analyze code to quickly find problems.
 - [Prettier](https://prettier.io): Opinionated code formatter.
+=======
+# solar-API-promise-energy
+>>>>>>> e74e4d749954c72f10af401b8f18dbae494335aa
